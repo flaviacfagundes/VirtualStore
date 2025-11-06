@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jakarta.persistence-api">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../APPS/dev/apps_dev/ECLIPSE/eclipselink/jlib/jpa/jakarta.persistence-api.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
