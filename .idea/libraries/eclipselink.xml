@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="eclipselink">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../APPS/dev/apps_dev/ECLIPSE/eclipselink/jlib/eclipselink.jar!/" />
+      <root url="jar://$PROJECT_DIR$/JARS/eclipselink.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
