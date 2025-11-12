@@ -12,7 +12,7 @@ public class Pedido {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Long id;
 
     @Column(name = "data_pedido", nullable = false)
     private LocalDate dataPedido = LocalDate.now();
@@ -32,8 +32,8 @@ public class Pedido {
 
     public Pedido() {}
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public LocalDate getDataPedido() { return dataPedido; }
     public void setDataPedido(LocalDate dataPedido) { this.dataPedido = dataPedido; }
