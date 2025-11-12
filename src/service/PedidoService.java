@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PedidoService {
 
-    private EntityManagerFactory EMF = Persistence.createEntityManagerFactory("VirtualStorePU");
+    private EntityManagerFactory EMF = Persistence.createEntityManagerFactory("virtualStorePU");
     private Logger LOG = new Logger(true, "LOGS/pedido_log.txt", "INFO");
 
     public void create(Pedido pedido) {

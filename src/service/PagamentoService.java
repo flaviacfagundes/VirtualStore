@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PagamentoService {
 
-    private EntityManagerFactory EMF = Persistence.createEntityManagerFactory("VirtualStorePU");
+    private EntityManagerFactory EMF = Persistence.createEntityManagerFactory("virtualStorePU");
     private Logger LOG = new Logger(true, "LOGS/pagamento_log.txt", "INFO");
 
     public void create(Pagamento pagamento) {
