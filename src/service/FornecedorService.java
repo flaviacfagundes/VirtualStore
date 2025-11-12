@@ -2,7 +2,6 @@ package service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 import model.Fornecedor;
 import utils.Logger;
 
@@ -10,32 +9,38 @@ import java.util.List;
 
 public class FornecedorService {
 
-    private EntityManagerFactory EMF = Persistence.createEntityManagerFactory("virtualStorePU");
+    private EntityManagerFactory emf() { return PersistenceManager.getEntityManagerFactory(); }
     private Logger LOG = new Logger(true, "LOGS/pedido_log.txt", "INFO");
 
     public void create(Fornecedor fornecedor) {
-        EntityManager EM = EMF.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { LOG.logError("Nenhum provedor de persistência disponível. Create abortado."); return; }
+        EntityManager EM = factory.createEntityManager();
         try {
             EM.getTransaction().begin();
             EM.persist(fornecedor);
             EM.getTransaction().commit();
             LOG.logSuccess("Fornecedor cadastrado: " + fornecedor.getId());
         } catch (Exception e) {
-            EM.getTransaction().rollback();
+            if (EM.getTransaction().isActive()) EM.getTransaction().rollback();
             LOG.logError("Erro ao criar fornecedor: " + e.getMessage());
         } finally { EM.close(); }
     }
 
     public List<Fornecedor> read() {
-        EntityManager EM = EMF.createEntityManager();
-        List<Fornecedor> fornecedores = EM.createQuery("SELECT f FROM fornecedor f", Fornecedor.class).getResultList();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { LOG.logError("Nenhum provedor de persistência disponível. Read retorna lista vazia."); return java.util.Collections.emptyList(); }
+        EntityManager EM = factory.createEntityManager();
+        List<Fornecedor> fornecedores = EM.createQuery("SELECT f FROM Fornecedor f", Fornecedor.class).getResultList();
         EM.close();
         LOG.logSuccess("Listagem de fornecedores executada!\n Total: " + fornecedores.size());
         return fornecedores;
     }
 
     public Fornecedor buscarPorId(Long id) {
-        EntityManager EM = EMF.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { LOG.logError("Nenhum provedor de persistência disponível. Busca abortada."); return null; }
+        EntityManager EM = factory.createEntityManager();
         Fornecedor fornecedor = EM.find(Fornecedor.class, id);
         EM.close();
         if (fornecedor == null) { LOG.logWarning("Fornecedor com ID " + id + " não encontrado!"); return null; }
@@ -44,20 +49,24 @@ public class FornecedorService {
     }
 
     public void update(Fornecedor fornecedor) {
-        EntityManager EM = EMF.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { LOG.logError("Nenhum provedor de persistência disponível. Update abortado."); return; }
+        EntityManager EM = factory.createEntityManager();
         try {
             EM.getTransaction().begin();
             EM.persist(fornecedor);
             EM.getTransaction().commit();
             LOG.logSuccess("Fornecedor atualizado: " + fornecedor.getId());
         } catch (Exception e) {
-            EM.getTransaction().rollback();
+            if (EM.getTransaction().isActive()) EM.getTransaction().rollback();
             LOG.logError("Erro ao atualizar fornecedor: " + e.getMessage());
         } finally { EM.close(); }
     }
 
     public void delete(Long id) {
-        EntityManager EM = EMF.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { LOG.logError("Nenhum provedor de persistência disponível. Delete abortado."); return; }
+        EntityManager EM = factory.createEntityManager();
         try {
             EM.getTransaction().begin();
             Fornecedor fornecedor = EM.find(Fornecedor.class, id);
@@ -66,7 +75,7 @@ public class FornecedorService {
             EM.getTransaction().commit();
             LOG.logSuccess("Fornecedor removido: " + id);
         } catch (Exception e) {
-            EM.getTransaction().rollback();
+            if (EM.getTransaction().isActive()) EM.getTransaction().rollback();
             LOG.logError("Erro ao remover fornecedor: " + e.getMessage());
         } finally { EM.close(); }
     }

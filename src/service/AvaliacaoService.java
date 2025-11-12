@@ -7,18 +7,20 @@ import java.util.List;
 
 public class AvaliacaoService {
 
-    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("virtualStorePU");
+    private EntityManagerFactory emf() { return PersistenceManager.getEntityManagerFactory(); }
     private Logger log = new Logger(true, "LOGS/avaliacao_log.txt", "INFO");
 
     public void create(Avaliacao avaliacao) {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Create abortado."); return; }
+        EntityManager em = factory.createEntityManager();
         try {
             em.getTransaction().begin();
             em.persist(avaliacao);
             em.getTransaction().commit();
             log.logSuccess("Avaliação criada para o produto: " + avaliacao.getProduto().getNome());
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             log.logError("Erro ao cadastrar avaliação: " + e.getMessage());
         } finally {
             em.close();
@@ -26,7 +28,9 @@ public class AvaliacaoService {
     }
 
     public List<Avaliacao> read() {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Read retorna lista vazia."); return java.util.Collections.emptyList(); }
+        EntityManager em = factory.createEntityManager();
         List<Avaliacao> avaliacoes = em.createQuery("SELECT a FROM Avaliacao a", Avaliacao.class).getResultList();
         em.close();
         log.logInfo("Listagem de avaliações executada. Total: " + avaliacoes.size());
@@ -34,7 +38,9 @@ public class AvaliacaoService {
     }
 
     public Avaliacao buscarPorId(Long id) {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Busca abortada."); return null; }
+        EntityManager em = factory.createEntityManager();
         Avaliacao avaliacao = em.find(Avaliacao.class, id);
         em.close();
         if (avaliacao != null)
@@ -45,14 +51,16 @@ public class AvaliacaoService {
     }
 
     public void update(Avaliacao avaliacao) {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Update abortado."); return; }
+        EntityManager em = factory.createEntityManager();
         try {
             em.getTransaction().begin();
             em.merge(avaliacao);
             em.getTransaction().commit();
             log.logSuccess("Avaliação atualizada para o produto: " + avaliacao.getProduto().getNome());
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             log.logError("Erro ao atualizar avaliação: " + e.getMessage());
         } finally {
             em.close();
@@ -60,7 +68,9 @@ public class AvaliacaoService {
     }
 
     public void delete(Long id) {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Delete abortado."); return; }
+        EntityManager em = factory.createEntityManager();
         try {
             em.getTransaction().begin();
             Avaliacao avaliacao = em.find(Avaliacao.class, id);
@@ -72,7 +82,7 @@ public class AvaliacaoService {
                 log.logWarning("Tentativa de remover avaliação inexistente (ID: " + id + ")");
             }
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             log.logError("Erro ao remover avaliação: " + e.getMessage());
         } finally {
             em.close();

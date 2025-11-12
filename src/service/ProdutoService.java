@@ -7,18 +7,20 @@ import java.util.List;
 
 public class ProdutoService {
 
-    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("virtualStorePU");
+    private EntityManagerFactory emf() { return PersistenceManager.getEntityManagerFactory(); }
     private Logger log = new Logger(true, "LOGS/produto_log.txt", "INFO");
 
     public void create(Produto produto) {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Create abortado."); return; }
+        EntityManager em = factory.createEntityManager();
         try {
             em.getTransaction().begin();
             em.persist(produto);
             em.getTransaction().commit();
             log.logSuccess("Produto cadastrado: " + produto.getNome());
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             log.logError("Erro ao cadastrar produto: " + e.getMessage());
         } finally {
             em.close();
@@ -26,15 +28,19 @@ public class ProdutoService {
     }
 
     public List<Produto> read() {
-        EntityManager em = emf.createEntityManager();
-        List<Produto> produtos = em.createQuery("SELECT p FROM produto p", Produto.class).getResultList();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Read retorna lista vazia."); return java.util.Collections.emptyList(); }
+        EntityManager em = factory.createEntityManager();
+        List<Produto> produtos = em.createQuery("SELECT p FROM Produto p", Produto.class).getResultList();
         em.close();
         log.logInfo("Listagem de produtos executada. Total: " + produtos.size());
         return produtos;
     }
 
     public Produto buscarPorId(Long id) {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Busca abortada."); return null; }
+        EntityManager em = factory.createEntityManager();
         Produto produto = em.find(Produto.class, id);
         em.close();
         if (produto != null)
@@ -45,14 +51,16 @@ public class ProdutoService {
     }
 
     public void update(Produto produto) {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Update abortado."); return; }
+        EntityManager em = factory.createEntityManager();
         try {
             em.getTransaction().begin();
             em.merge(produto);
             em.getTransaction().commit();
             log.logSuccess("Produto atualizado: " + produto.getNome());
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             log.logError("Erro ao atualizar produto: " + e.getMessage());
         } finally {
             em.close();
@@ -60,7 +68,9 @@ public class ProdutoService {
     }
 
     public void delete(Long id) {
-        EntityManager em = emf.createEntityManager();
+        EntityManagerFactory factory = emf();
+        if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Delete abortado."); return; }
+        EntityManager em = factory.createEntityManager();
         try {
             em.getTransaction().begin();
             Produto produto = em.find(Produto.class, id);
@@ -72,7 +82,7 @@ public class ProdutoService {
                 log.logWarning("Tentativa de remover produto inexistente (ID: " + id + ")");
             }
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             log.logError("Erro ao remover produto: " + e.getMessage());
         } finally {
             em.close();

@@ -7,18 +7,20 @@ import model.Cliente;
 import utils.Logger;
 
 public class ClienteService {
-	private EntityManagerFactory emf = Persistence.createEntityManagerFactory("virtualStorePU");
+	private EntityManagerFactory emf() { return PersistenceManager.getEntityManagerFactory(); }
 	private Logger log = new Logger(true, "LOGS/cliente_log.txt", "INFO");
 	
 	public void create(Cliente cliente) {
-		EntityManager em = emf.createEntityManager();
+		EntityManagerFactory factory = emf();
+		if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Create abortado."); return; }
+		EntityManager em = factory.createEntityManager();
 		try {
 			em.getTransaction().begin();
 			em.persist(cliente);
 			em.getTransaction().commit();
 			log.logSuccess("Cliente cadastrado: " + cliente.getNome());
 		} catch (Exception e){
-			em.getTransaction().rollback();
+			if (em.getTransaction().isActive()) em.getTransaction().rollback();
 			log.logError("Erro ao cadastrar cliente: " + e.getMessage());
 		} finally {
 			em.close();
@@ -26,15 +28,19 @@ public class ClienteService {
 	}
 	
 	public List<Cliente> read() {
-		EntityManager em = emf.createEntityManager();
-		List<Cliente> clientes = em.createQuery("SELECT c FROM cliente c", Cliente.class).getResultList();
+		EntityManagerFactory factory = emf();
+		if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Read retorna lista vazia."); return java.util.Collections.emptyList(); }
+		EntityManager em = factory.createEntityManager();
+		List<Cliente> clientes = em.createQuery("SELECT c FROM Cliente c", Cliente.class).getResultList();
 		em.close();
 		log.logInfo("Listagem de clientes executada. Total de clientes: " + clientes.size());
 		return clientes;
 	}
 
 	public Cliente buscarPorEmail(String email) {
-	    EntityManager em = emf.createEntityManager();
+	    EntityManagerFactory factory = emf();
+	    if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Busca abortada."); return null; }
+	    EntityManager em = factory.createEntityManager();
 	    Cliente cliente = null;
 
 	    try {
@@ -59,14 +65,16 @@ public class ClienteService {
 	}
 	
 	public void update(Cliente cliente) {
-		EntityManager em = emf.createEntityManager();
+		EntityManagerFactory factory = emf();
+		if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Update abortado."); return; }
+		EntityManager em = factory.createEntityManager();
 		try {
 			em.getTransaction().begin();
 			em.merge(cliente);
 			em.getTransaction().commit();
 			log.logSuccess("Cliente atualizado: " + cliente.getNome());
 		} catch (Exception e) {
-			em.getTransaction().rollback();
+			if (em.getTransaction().isActive()) em.getTransaction().rollback();
 			log.logError("Erro ao atualizar cliente: " + e.getMessage());
 		} finally {
 			em.close();
@@ -74,12 +82,14 @@ public class ClienteService {
 	}
 	
 	public void delete(String email) {
-	    EntityManager em = emf.createEntityManager();
+	    EntityManagerFactory factory = emf();
+	    if (factory == null) { log.logError("Nenhum provedor de persistência disponível. Delete abortado."); return; }
+	    EntityManager em = factory.createEntityManager();
 	    try {
 	        em.getTransaction().begin();
 
 	        TypedQuery<Cliente> query = em.createQuery(
-	            "SELECT c FROM cliente c WHERE c.email = :email", Cliente.class);
+	            "SELECT c FROM Cliente c WHERE c.email = :email", Cliente.class);
 	        query.setParameter("email", email);
 
 	        Cliente cliente = null;
@@ -97,7 +107,7 @@ public class ClienteService {
 	            em.getTransaction().rollback();
 	        }
 	    } catch (Exception e) {
-	        em.getTransaction().rollback();
+	        if (em.getTransaction().isActive()) em.getTransaction().rollback();
 	        log.logError("Erro ao remover cliente por email (" + email + "): " + e.getMessage());
 	    } finally {
 	        em.close();
