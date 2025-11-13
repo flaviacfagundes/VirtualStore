@@ -27,7 +27,12 @@ public class Pedido {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "pedido_produto",
+        joinColumns = @JoinColumn(name = "pedido_id", referencedColumnName = "id"),
+        inverseJoinColumns = @JoinColumn(name = "produto_id", referencedColumnName = "id")
+    )
     private List<Produto> produtos;
 
     public Pedido() {}

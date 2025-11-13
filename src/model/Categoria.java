@@ -26,7 +26,6 @@ public class Categoria {
     private LocalDateTime dataCriacao = LocalDateTime.now();
 
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Column(name = "id_produto")
     private List<Produto> produtos;
 
     public Categoria() {}

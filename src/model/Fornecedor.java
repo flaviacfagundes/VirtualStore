@@ -23,7 +23,7 @@ public class Fornecedor {
 	@Column(name = "telefone", length = 20)
 	private String telefone;
 
-	@OneToMany(mappedBy = "fornecedor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "fornecedor", fetch = FetchType.LAZY)
 	private List<Produto> produtos;
 
 	public Fornecedor() {}

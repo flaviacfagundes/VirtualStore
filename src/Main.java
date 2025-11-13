@@ -1,3 +1,4 @@
+import service.PersistenceManager;
 import utils.Logger;
 import views.ViewsManager;
 
@@ -7,6 +8,18 @@ public class Main {
 
     public static void main(String[] args) {
         LOGGER.logInfo("Aplicação iniciada...");
+        
+        // Inicializa o banco de dados e cria as tabelas automaticamente
+        LOGGER.logInfo("Inicializando banco de dados e criando tabelas...");
+        try {
+            PersistenceManager.initialize();
+            LOGGER.logSuccess("Banco de dados inicializado com sucesso! Tabelas criadas/verificadas.");
+        } catch (Exception e) {
+            LOGGER.logError("Erro ao inicializar banco de dados: " + e.getMessage());
+            e.printStackTrace();
+            LOGGER.logWarning("Aplicação continuará, mas podem ocorrer erros ao acessar o banco de dados.");
+        }
+        
         while (running) {
             ViewsManager.clear();
             ViewsManager.title("Bem-vindo à Loja Virtual");

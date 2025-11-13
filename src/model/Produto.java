@@ -37,6 +37,11 @@ public class Produto {
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Avaliacao> avaliacoes;
 
+    // 🔗 Muitos produtos pertencem a um fornecedor
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_fornecedor")
+    private Fornecedor fornecedor;
+
     public Produto() {}
 
     public Produto(String nome, String descricao, Double preco, int estoque, Categoria categoria) {
@@ -71,6 +76,9 @@ public class Produto {
 
     public List<Avaliacao> getAvaliacoes() { return avaliacoes; }
     public void setAvaliacoes(List<Avaliacao> avaliacoes) { this.avaliacoes = avaliacoes; }
+
+    public Fornecedor getFornecedor() { return fornecedor; }
+    public void setFornecedor(Fornecedor fornecedor) { this.fornecedor = fornecedor; }
 
     @Override
     public String toString() {
