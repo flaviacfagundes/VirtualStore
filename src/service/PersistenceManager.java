@@ -36,15 +36,8 @@ public class PersistenceManager {
         EntityManager em = null;
         try {
             em = emf.createEntityManager();
-            // Força uma conexão inicial que irá criar as tabelas se necessário
-            // Ao criar o EntityManager e acessar o metamodel, o EclipseLink
-            // irá criar as tabelas automaticamente conforme configurado no persistence.xml
             em.getMetamodel();
-            
-            // Opcional: Força a criação executando uma query simples
-            // Isso garante que as tabelas sejam realmente criadas no banco
             em.getTransaction().begin();
-            // Não precisa fazer nada, apenas iniciar uma transação
             em.getTransaction().commit();
             
             System.out.println("[PersistenceManager] ✓ Banco de dados inicializado. Tabelas criadas/verificadas automaticamente.");
@@ -52,17 +45,10 @@ public class PersistenceManager {
             System.err.println("[PersistenceManager] ✗ Erro ao inicializar banco de dados: " + e.getMessage());
             e.printStackTrace();
             if (em != null && em.getTransaction().isActive()) {
-                try {
-                    em.getTransaction().rollback();
-                } catch (Exception ex) {
-                    // Ignora erro no rollback
-                }
+                try { em.getTransaction().rollback(); }
+                catch (Exception ex) { /* Ignorar */ }
             }
-        } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
-        }
+        } finally { if (em != null && em.isOpen()) { em.close(); } }
     }
 
     /**
@@ -70,9 +56,7 @@ public class PersistenceManager {
      * Este método pode ser chamado no início da aplicação para garantir
      * que as tabelas sejam criadas antes de qualquer operação.
      */
-    public static synchronized void initialize() {
-        getEntityManagerFactory(); // Isso vai chamar initializeDatabase()
-    }
+    public static synchronized void initialize() { getEntityManagerFactory(); }
 
     public static synchronized void close() {
         if (emf != null && emf.isOpen()) {
